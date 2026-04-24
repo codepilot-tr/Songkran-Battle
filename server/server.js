@@ -4,12 +4,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http, { cors: { origin: "*" } });
 const path = require('path');
 
-// ค้นหาบรรทัดที่สั่ง http.listen หรือ server.listen
-const PORT = process.env.PORT || 3000; 
 
-http.listen(PORT, () => {
-    console.log(`🚀 Server is flying on port ${PORT}`);
-});
 
 const rooms = {};
 const playerRoom = {}; // ✅ เพิ่มบรรทัดนี้เพื่อจดว่า "ใครอยู่ห้องไหน"
@@ -156,4 +151,9 @@ socket.on('disconnect', () => {
     });
 });
 
-http.listen(3000, () => console.log(`Server รันอยู่ที่ http://localhost:3000`));
+// ค้นหาบรรทัดที่สั่ง http.listen หรือ server.listen
+const PORT = process.env.PORT || 3000; 
+
+http.listen(PORT, () => {
+    console.log(`🚀 Server is flying on port ${PORT}`);
+});
