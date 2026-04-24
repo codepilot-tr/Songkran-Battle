@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Songkran Battle Online 💦</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Itim&family=Mali:wght@400;700&family=Kanit:wght@300;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="game-container">
+        <section id="home-scene" class="scene active">
+            <div class="ocean-bg">
+                <div class="wave wave-1"></div>
+                <div class="wave wave-2"></div>
+            </div>
+            <div class="home-content">
+                <h1 class="main-title">สงกรานต์ออนไลน์ 💦</h1>
+                <p class="sub-title">สาดน้ำคลายร้อน เชื่อมต่อทุกความสัมพันธ์</p>
+                
+                <div class="char-display">
+                    <div class="char-idle blue"></div>
+                    <div class="char-idle red"></div>
+                </div>
+
+                <div class="menu-buttons">
+                    <button id="createRoomBtn" class="btn-primary">สร้างห้องใหม่</button>
+                    <div class="join-box">
+                        <input type="text" id="roomInput" placeholder="ใส่รหัสห้อง..." maxlength="4" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        <button id="joinRoomBtn" class="btn-secondary">เข้าห้อง</button>
+                    </div>
+                </div>
+            <button class="btn-help">วิธีเล่น</button>
+        </section>
+
+        <div id="help-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-help
+                ">&times;</span>
+                <h2>💦 วิธีเล่น Water War Online</h2>
+                <hr>
+                <div class="help-grid">
+                    <div class="help-item">
+                        <h3>🎮 การควบคุม</h3>
+                        <p><b>คีย์บอร์ด:</b> W/S หรือ ลูกศร เพื่อเดิน, Space เพื่อยิง</p>
+                        <p><b>iPad:</b> ใช้ปุ่มกดบนหน้าจอได้เลย!</p>
+                    </div>
+                    <div class="help-item">
+                        <h3>💧 กติกา</h3>
+                        <p>สาดน้ำใส่เพื่อนให้ HP เหลือ 0! ระวังกระสุนหมด ต้องรอรีโหลด</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="lobby-scene" class="scene" style="display: none;">
+            <h2 class="lobby-title">ROOM: <span id="displayRoomId">----</span></h2>
+            <div class="lobby-container">
+                <div  class="player-panel">
+                    <div id="p1-indicator" class="avatar-circle">P1</div>
+                        <div class="input-group">
+                            <input type="text" id="p1-name-input" placeholder="ใส่ชื่อ P1..." maxlength="10">
+                        </div>
+                        <button id="p1-ready-btn" class="ready-btn">พร้อมแล้ว!</button>
+                        <p id="p1-status" class="status-label">ยังไม่พร้อม</p>
+                    </div>
+                    <div id="countdown-overlay" class="countdown-text" style="display: none;">3</div>
+                    <div id="p2-section" class="player-panel">
+                        <div id="p2-indicator" class="avatar-circle">P2</div>
+                        <div class="input-group">
+                            <input type="text" id="p2-name-input" placeholder="ใส่ชื่อ P2..." maxlength="10">
+                        </div>
+                        <button id="p2-ready-btn" class="ready-btn">พร้อมแล้ว!</button>
+                        <p id="p2-status" class="status-label">ยังไม่พร้อม</p>
+                    </div>
+                </div>
+                <!-- <button id="startMatchBtn" class="ready-btn">Start Game!</button> -->
+            </div>
+            <!-- <p id="statusText" class="global-status">รอผู้เล่นเชื่อมต่อ...</p> -->
+        </div>
+
+        <section id="game-scene" class="scene">
+            <div class="game-ui">
+                <audio id="sfx-empty" src="sounds/empty.mp3"></audio>
+                <div class="stats left">
+                    <span class="p1-name-take">ชื่อ Player</span>
+                </div>
+                <div id="gameRoomDisplay" class="room-info">ROOM: ----</div>
+                <div class="stats right"><span class="p2-name-take">ชื่อ Player</span></div>
+                <div id="my-ammo-container" class="ammo-container">
+                    💧 <span id="my-ammo-val">10</span>/10
+                </div>
+            </div>
+            <canvas id="gameCanvas" width="800" height="450"></canvas>
+            <div id="mobile-controls">
+                <div class="movement-btns">
+                    <button id="btn-up" class="ctrl-btn">▲</button>
+                    <button id="btn-down" class="ctrl-btn">▼</button>
+                </div>
+                <button id="btn-shoot" class="ctrl-btn shoot-btn">สาดน้ำ 💦</button>
+            </div>
+            <p class="controls-hint">ใช้ปุ่ม W/S เพื่อขยับ | SPACEBAR เพื่อสาดน้ำ!</p>
+        </section>
+
+    <div id="disconnectOverlay" class="overlay" >
+        <div class="box">
+            <h2>⚠️ เพื่อนหลุดออกจากเกม!</h2>
+            <button onclick="location.reload()" class="btn-primary">ไปหน้าแรก</button>
+        </div>
+    </div>
+
+    <div id="resultOverlay">
+        <h1 id="resultText"></h1>
+        <button id="restartBtn">เริ่มเกมใหม่</button>
+    </div>
+
+    <div id="error-modal" class="modal" style="display: none;">
+        <div class="modal-content" style="text-align: center; border: 3px solid #ff4757;">
+            <h2 style="color: #ff4757;">⚠️ แจ้งเตือน</h2>
+            <p id="error-message-text" style="font-size: 1.2rem; margin: 20px 0;"></p>
+            <button class="close-help error" onclick="document.getElementById('error-modal').style.display='none'">ตกลง</button>
+        </div>
+    </div>
+
+    <div id="join-toast" class="toast-container" >
+        <div class="toast-content">
+            <span class="toast-icon">👋</span>
+            <span id="join-toast-text">มีคนเข้าห้องแล้ว!</span>
+        </div>
+    </div>
+
+    <script src="../server/server.js"></script>
+    <script src="./game.js"></script>
+</body>
+</html>
